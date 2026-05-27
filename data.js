@@ -1,211 +1,120 @@
-/* ==========================================
-   NEET BIOLOGY 10,000 PYQs DATABASE
-   ========================================== */
+/* ===============================
+   AI QUESTION GENERATOR
+=============================== */
 
-const realNcertQuestions = [
+async function generateAIQuestions() {
 
-    {
-        chapter: "Cell: The Unit of Life",
+    const chapter =
+        document.getElementById(
+            "chapterSelector"
+        ).value;
 
-        question:
-            "Which cell organelle is mainly responsible for synthesis of steroid hormones?",
+    const count =
+        parseInt(
+            document.getElementById(
+                "questionCount"
+            ).value
+        );
 
-        options: [
-            "Smooth Endoplasmic Reticulum",
-            "Rough Endoplasmic Reticulum",
-            "Golgi Apparatus",
-            "Lysosomes"
-        ],
+    /* ===============================
+       PUT YOUR GEMINI API KEY HERE
+    =============================== */
 
-        answer:
-            "Smooth Endoplasmic Reticulum"
-    },
+    const apiKey =
+        "AIzaSyDZpLcl30LWhWL5n8GqH5dw_jm3RTBSOnc";
 
-    {
-        chapter: "Cell Cycle and Cell Division",
+    /* =============================== */
 
-        question:
-            "Crossing over occurs during which stage of meiosis?",
+    const prompt = `
+Generate ${count} NEET Biology MCQs
+from chapter "${chapter}".
 
-        options: [
-            "Pachytene",
-            "Zygotene",
-            "Diplotene",
-            "Diakinesis"
-        ],
+Return ONLY valid JSON array.
 
-        answer:
-            "Pachytene"
-    },
+Format:
 
-    {
-        chapter:
-            "Principles of Inheritance and Variation",
+[
+  {
+    "question": "Question text",
+    "options": [
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D"
+    ],
+    "answer": "Correct option"
+  }
+]
+`;
 
-        question:
-            "Trisomy of chromosome 21 causes:",
+    try {
 
-        options: [
-            "Down Syndrome",
-            "Turner Syndrome",
-            "Klinefelter Syndrome",
-            "Haemophilia"
-        ],
+        const response =
+            await fetch(
 
-        answer:
-            "Down Syndrome"
-    },
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey,
 
-    {
-        chapter:
-            "Molecular Basis of Inheritance",
+                {
+                    method: "POST",
 
-        question:
-            "Which nitrogen base is present in RNA but absent in DNA?",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-        options: [
-            "Uracil",
-            "Thymine",
-            "Adenine",
-            "Cytosine"
-        ],
+                    body: JSON.stringify({
 
-        answer:
-            "Uracil"
-    },
+                        contents: [
 
-    {
-        chapter:
-            "Breathing and Exchange of Gases",
+                            {
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                }
+            );
 
-        question:
-            "Carbon dioxide is mainly transported in blood as:",
+        const data =
+            await response.json();
 
-        options: [
-            "Bicarbonate ions",
-            "Carbaminohaemoglobin",
-            "Dissolved gas",
-            "Carbonic acid"
-        ],
+        console.log(data);
 
-        answer:
-            "Bicarbonate ions"
-    },
+        const rawText =
+            data.candidates[0]
+            .content.parts[0].text;
 
-    {
-        chapter:
-            "Chemical Coordination and Integration",
+        const cleanedText =
+            rawText
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim();
 
-        question:
-            "Which hormone increases blood glucose level?",
+        const aiQuestions =
+            JSON.parse(cleanedText);
 
-        options: [
-            "Glucagon",
-            "Insulin",
-            "Thyroxine",
-            "Oxytocin"
-        ],
+        renderAIQuestions(aiQuestions);
 
-        answer:
-            "Glucagon"
-    },
-
-    {
-        chapter:
-            "Photosynthesis in Higher Plants",
-
-        question:
-            "Primary electron acceptor in Photosystem II is:",
-
-        options: [
-            "Pheophytin",
-            "Ferredoxin",
-            "Plastocyanin",
-            "Cytochrome"
-        ],
-
-        answer:
-            "Pheophytin"
-    },
-
-    {
-        chapter:
-            "Biotechnology: Principles and Processes",
-
-        question:
-            "Which restriction enzyme cuts GAATTC sequence?",
-
-        options: [
-            "EcoRI",
-            "BamHI",
-            "HindIII",
-            "SmaI"
-        ],
-
-        answer:
-            "EcoRI"
     }
-];
 
-/* ==========================================
-   GENERATE 10,000 QUESTIONS
-   ========================================== */
+    catch(error) {
 
-const full10000Database = [];
+        console.error(error);
 
-const targetLimit = 10000;
-
-for (let i = 1; i <= targetLimit; i++) {
-
-    const coreData =
-        realNcertQuestions[
-            (i - 1) % realNcertQuestions.length
-        ];
-
-    full10000Database.push({
-
-        id: i,
-
-        chapter:
-            coreData.chapter,
-
-        question:
-            `[PYQ ${i}] ${coreData.question}`,
-
-        options: [
-            ...coreData.options
-        ],
-
-        answer:
-            coreData.answer
-    });
+        alert(
+            "AI generation failed"
+        );
+    }
 }
 
-/* ==========================================
-   EXPORT DATABASE
-   ========================================== */
+/* ===============================
+   RENDER QUESTIONS
+=============================== */
 
-window.allQuestionsData = full10000Database;
-
-/* ==========================================
-   LOAD QUESTION SET
-   ========================================== */
-
-function loadSet() {
-
-    const startIdx = parseInt(
-        document.getElementById(
-            "setSelector"
-        ).value
-    );
-
-    const endIdx = startIdx + 100;
-
-    const currentSubset =
-        window.allQuestionsData.slice(
-            startIdx,
-            endIdx
-        );
+function renderAIQuestions(questionList) {
 
     const qViewport =
         document.getElementById(
@@ -221,22 +130,7 @@ function loadSet() {
 
     aViewport.innerHTML = "";
 
-    document.getElementById(
-        "answerSheetBox"
-    ).style.display = "none";
-
-    if (currentSubset.length === 0) {
-
-        qViewport.innerHTML = `
-            <p style="color:red;">
-                No Questions Found!
-            </p>
-        `;
-
-        return;
-    }
-
-    currentSubset.forEach((q) => {
+    questionList.forEach((q, index) => {
 
         qViewport.innerHTML += `
 
@@ -244,9 +138,8 @@ function loadSet() {
 
                 <div class="q-meta">
 
-                    Q. ${q.id}
-                    •
-                    ${q.chapter}
+                    AI Question
+                    ${index + 1}
 
                 </div>
 
@@ -287,7 +180,7 @@ function loadSet() {
 
             <div class="ans-pill">
 
-                Q${q.id}:
+                Q${index + 1}:
                 ${q.answer}
 
             </div>
@@ -295,9 +188,9 @@ function loadSet() {
     });
 }
 
-/* ==========================================
-   CHECK ANSWERS
-   ========================================== */
+/* ===============================
+   CHECK ANSWER
+=============================== */
 
 function checkAnswer(
     element,
@@ -315,11 +208,11 @@ function checkAnswer(
 
     allOptions.forEach(opt => {
 
-        opt.style.pointerEvents = "none";
+        opt.style.pointerEvents =
+            "none";
 
         if (
-            opt.innerText.trim() ===
-            correct.trim()
+            opt.innerText.includes(correct)
         ) {
 
             opt.style.background =
@@ -327,42 +220,34 @@ function checkAnswer(
 
             opt.style.border =
                 "2px solid green";
-
-            opt.innerHTML +=
-                " ✅ Correct Answer";
         }
     });
 
     if (
-        selected.trim() ===
-        correct.trim()
+        selected === correct
     ) {
 
         element.style.background =
             "#a5d6a7";
 
-        element.style.border =
-            "2px solid green";
-
         element.innerHTML +=
             " ✅ Correct";
 
-    } else {
+    }
+
+    else {
 
         element.style.background =
             "#ffcdd2";
-
-        element.style.border =
-            "2px solid red";
 
         element.innerHTML +=
             " ❌ Wrong";
     }
 }
 
-/* ==========================================
-   TOGGLE ANSWER SHEET
-   ========================================== */
+/* ===============================
+   TOGGLE ANSWERS
+=============================== */
 
 function toggleAnswers() {
 
@@ -372,31 +257,21 @@ function toggleAnswers() {
         );
 
     if (
-        box.style.display === "block"
+        box.style.display ===
+        "block"
     ) {
 
-        box.style.display = "none";
+        box.style.display =
+            "none";
+    }
 
-    } else {
+    else {
 
-        box.style.display = "block";
+        box.style.display =
+            "block";
 
         box.scrollIntoView({
             behavior: "smooth"
         });
     }
 }
-
-/* ==========================================
-   INITIAL LOAD
-   ========================================== */
-
-window.onload = function () {
-
-    loadSet();
-};
-
-console.log(
-    "NEET Database Loaded:",
-    window.allQuestionsData.length
-);
