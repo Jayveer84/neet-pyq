@@ -7,7 +7,7 @@
     --primary:
         #00796b;
 
-    --primary-dark:
+    --primary-green:
         #004d40;
 
     --accent:
@@ -84,7 +84,7 @@ header {
         );
 
     color:
-        white;
+        blue;
 
     padding:
         45px 20px;
@@ -175,7 +175,7 @@ header p {
         700;
 
     color:
-        var(--primary-dark);
+        var(--primary-darkblue);
 }
 
 /* ==========================================
