@@ -4,11 +4,29 @@
 
 async function generateAIQuestions() {
 
+    // API KEY
+    const apiKey =
+        document.getElementById(
+            "apiKeyInput"
+        ).value;
+
+    // Validation
+    if (!apiKey) {
+
+        alert(
+            "Please enter Gemini API Key"
+        );
+
+        return;
+    }
+
+    // Chapter
     const chapter =
         document.getElementById(
             "chapterSelector"
         ).value;
 
+    // Question Count
     const count =
         parseInt(
             document.getElementById(
@@ -16,20 +34,16 @@ async function generateAIQuestions() {
             ).value
         );
 
-    /* ===============================
-       PUT YOUR GEMINI API KEY HERE
-    =============================== */
-
-    const apiKey =
-    prompt(
-        "Enter Gemini API Key"
-    );
-
-    /* =============================== */
-
+    // AI Prompt
     const prompt = `
 Generate ${count} NEET Biology MCQs
 from chapter "${chapter}".
+
+Rules:
+- NEET level questions
+- 4 options
+- Only one correct answer
+- Mix conceptual and NCERT style
 
 Return ONLY valid JSON array.
 
@@ -51,55 +65,78 @@ Format:
 
     try {
 
-        ntents: [
+        // Loading UI
+        document.getElementById(
+            "questions-viewport"
+        ).innerHTML = `
+            <div class="q-card">
+                Generating AI Questions...
+            </div>
+        `;
 
-         const response =
-    await fetch(
+        // API CALL
+        const response =
+            await fetch(
 
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey,
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey,
 
-        {
-            method: "POST",
+                {
+                    method: "POST",
 
-            headers: {
-                "Content-Type":
-                    "application/json"
-            },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-            body: JSON.stringify({
+                    body: JSON.stringify({
 
-                contents: [
+                        contents: [
 
-                    {
-                        parts: [
                             {
-                                text: prompt
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
                             }
                         ]
-                    }
-                ]
-            })
-        }
-    );
+                    })
+                }
+            );
 
+        // Convert Response
         const data =
             await response.json();
 
         console.log(data);
 
+        // Error Handling
+        if (data.error) {
+
+            alert(
+                data.error.message
+            );
+
+            return;
+        }
+
+        // Extract AI Text
         const rawText =
             data.candidates[0]
             .content.parts[0].text;
 
+        // Clean Markdown
         const cleanedText =
             rawText
             .replace(/```json/g, "")
             .replace(/```/g, "")
             .trim();
 
+        // Convert JSON
         const aiQuestions =
             JSON.parse(cleanedText);
 
+        // Render Questions
         renderAIQuestions(aiQuestions);
 
     }
@@ -134,6 +171,7 @@ function renderAIQuestions(questionList) {
 
     aViewport.innerHTML = "";
 
+    // Loop Questions
     questionList.forEach((q, index) => {
 
         qViewport.innerHTML += `
@@ -163,8 +201,8 @@ function renderAIQuestions(questionList) {
                             onclick="
                                 checkAnswer(
                                     this,
-                                    '${option}',
-                                    '${q.answer}'
+                                    '${option.replace(/'/g, "\\'")}',
+                                    '${q.answer.replace(/'/g, "\\'")}'
                                 )
                             "
                         >
@@ -178,8 +216,10 @@ function renderAIQuestions(questionList) {
                 </div>
 
             </div>
+
         `;
 
+        // Answer Sheet
         aViewport.innerHTML += `
 
             <div class="ans-pill">
@@ -188,6 +228,7 @@ function renderAIQuestions(questionList) {
                 ${q.answer}
 
             </div>
+
         `;
     });
 }
@@ -210,13 +251,16 @@ function checkAnswer(
             ".option-item"
         );
 
+    // Disable Multiple Clicks
     allOptions.forEach(opt => {
 
         opt.style.pointerEvents =
             "none";
 
+        // Highlight Correct
         if (
-            opt.innerText.includes(correct)
+            opt.innerText.trim() ===
+            correct.trim()
         ) {
 
             opt.style.background =
@@ -227,8 +271,10 @@ function checkAnswer(
         }
     });
 
+    // Correct
     if (
-        selected === correct
+        selected.trim() ===
+        correct.trim()
     ) {
 
         element.style.background =
@@ -236,13 +282,16 @@ function checkAnswer(
 
         element.innerHTML +=
             " ✅ Correct";
-
     }
 
+    // Wrong
     else {
 
         element.style.background =
             "#ffcdd2";
+
+        element.style.border =
+            "2px solid red";
 
         element.innerHTML +=
             " ❌ Wrong";
