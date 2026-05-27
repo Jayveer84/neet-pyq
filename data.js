@@ -1,32 +1,15 @@
-/* ===============================
-   AI QUESTION GENERATOR
-=============================== */
-
 async function generateAIQuestions() {
 
-    // API KEY
     const apiKey =
         document.getElementById(
             "apiKeyInput"
-        ).value;
+        ).value.trim();
 
-    // Validation
-    if (!apiKey) {
-
-        alert(
-            "Please enter Gemini API Key"
-        );
-
-        return;
-    }
-
-    // Chapter
     const chapter =
         document.getElementById(
             "chapterSelector"
         ).value;
 
-    // Question Count
     const count =
         parseInt(
             document.getElementById(
@@ -34,49 +17,122 @@ async function generateAIQuestions() {
             ).value
         );
 
-    // AI Prompt
+    if (!apiKey) {
+
+        alert("Enter API Key");
+
+        return;
+    }
+
     const prompt = `
-Generate ${count} NEET Biology MCQs
-from chapter "${chapter}".
+Generate ${count} NEET Biology MCQs from chapter "${chapter}".
 
-Rules:
-- NEET level questions
-- 4 options
-- Only one correct answer
-- Mix conceptual and NCERT style
-
-Return ONLY valid JSON array.
-
-Format:
+Return ONLY pure JSON.
 
 [
-  {
-    "question": "Question text",
-    "options": [
-      "Option A",
-      "Option B",
-      "Option C",
-      "Option D"
-    ],
-    "answer": "Correct option"
-  }
+ {
+   "question":"Question",
+   "options":["A","B","C","D"],
+   "answer":"Correct option"
+ }
 ]
 `;
 
     try {
 
-        // Loading UI
         document.getElementById(
             "questions-viewport"
-        ).innerHTML = `
-            <div class="q-card">
-                Generating AI Questions...
-            </div>
-        `;
+        ).innerHTML =
+            "<h2>Generating...</h2>";
 
-        // API CALL
         const response =
             await fetch(
+
+                "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + apiKey,
+
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        console.log(data);
+
+        if (data.error) {
+
+            alert(
+                data.error.message
+            );
+
+            return;
+        }
+
+        const rawText =
+            data.candidates[0]
+            .content.parts[0]
+            .text;
+
+        console.log(rawText);
+
+        const cleanedText =
+            rawText
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim();
+
+        let aiQuestions;
+
+        try {
+
+            aiQuestions =
+                JSON.parse(cleanedText);
+
+        }
+
+        catch {
+
+            alert(
+                "Invalid JSON from Gemini"
+            );
+
+            console.log(cleanedText);
+
+            return;
+        }
+
+        renderAIQuestions(aiQuestions);
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "ERROR: " + error.message
+        );
+    }
+}
 
                 "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey,
 
