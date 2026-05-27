@@ -20,6 +20,7 @@ async function generateAIQuestions() {
     if (!apiKey) {
 
         alert("Enter API Key");
+        <button>submit</button>
 
         return;
     }
