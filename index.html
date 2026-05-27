@@ -1,36 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>NEET Biology 10,000 PYQs Portal</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    />
 
-    <!-- External CSS -->
-    <link rel="stylesheet" href="Style.css" />
+    <title>
+        NEET Biology AI Portal
+    </title>
+
+    <!-- CSS -->
+    <link
+        rel="stylesheet"
+        href="Style.css"
+    />
 
     <!-- Database -->
+    <script src="data.js"></script>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header>
+
+            <h1>
+                NEET Biology 10,000 PYQs Quest
+            </h1>
+
+            <p>
+                Adaptive Online Self-Assessment System
+            </p>
+
+        </header>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+
+            <!-- Chapter -->
+            <div>
+
+                <span>
+                    Select Chapter:
+                </span>
+
+                <select id="chapterSelector">
+
+                    <option value="Cell: The Unit of Life">
+                        Cell Biology
+                    </option>
+
+                    <option value="Molecular Basis of Inheritance">
+                        Molecular Biology
+                    </option>
+
+                    <option value="Principles of Inheritance and Variation">
+                        Genetics
+                    </option>
+
+                    <option value="Photosynthesis in Higher Plants">
+                        Photosynthesis
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- Question Count -->
+            <div>
+
+                <span>
+                    Question Quantity:
+                </span>
+
+                <select id="questionCount">
+
+                    <option value="5">
+                        5
+                    </option>
+
+                    <option value="10">
+                        10
+                    </option>
+
+                    <option value="20">
+                        20
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- AI BUTTON -->
+            <div>
+
+                <button
+                    class="reveal-btn"
+                    onclick="generateAIQuestions()"
+                >
+                    Generate AI Questions
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- QUESTIONS -->
+        <div id="questions-viewport">
+
+            Loading Questions...
+
+        </div>
+
+        <!-- ANSWERS -->
+        <div class="action-zone">
+
+            <button
+                class="reveal-btn"
+                onclick="toggleAnswers()"
+            >
+                View Answer Sheet
+            </button>
+
+            <div
+                class="answer-sheet"
+                id="answerSheetBox"
+            >
+
+                <h2>
+                    Official Verification Sheet
+                </h2>
+
+                <p>
+                    Cross-check answers below
+                </p>
+
+                <div
+                    class="ans-grid"
+                    id="answers-viewport"
+                >
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
     <script>
 
-async function generateAIQuestions() {
+        /* ===============================
+           AI QUESTION GENERATOR
+        =============================== */
 
-    const chapter =
-        document.getElementById(
-            "chapterSelector"
-        ).value;
+        async function generateAIQuestions() {
 
-    const count =
-        parseInt(
-            document.getElementById(
-                "questionCount"
-            ).value
-        );
+            const chapter =
+                document.getElementById(
+                    "chapterSelector"
+                ).value;
 
-    // PUT YOUR NEW API KEY HERE
-    const apiKey =
-        "AIzaSyBcBKVPDrNoKbPKHEG3aAzS7dv7nBlF5gY";
+            const count =
+                parseInt(
+                    document.getElementById(
+                        "questionCount"
+                    ).value
+                );
 
-    const prompt = `
+            // PUT NEW API KEY HERE
+            const apiKey =
+                "PASTE_NEW_API_KEY";
+
+            const prompt = `
 Generate ${count} NEET Biology MCQs
 from chapter "${chapter}".
 
@@ -52,343 +202,230 @@ Format:
 ]
 `;
 
-    try {
+            try {
 
-        const response =
-            await fetch(
+                const response =
+                    await fetch(
 
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey,
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey,
 
-                {
-                    method: "POST",
+                        {
+                            method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-                    body: JSON.stringify({
+                            body: JSON.stringify({
 
-                        contents: [
+                                contents: [
 
-                            {
-                                parts: [
                                     {
-                                        text: prompt
+                                        parts: [
+                                            {
+                                                text: prompt
+                                            }
+                                        ]
                                     }
                                 ]
-                            }
-                        ]
-                    })
-                }
-            );
+                            })
+                        }
+                    );
 
-        const data =
-            await response.json();
+                const data =
+                    await response.json();
 
-        console.log(data);
+                console.log(data);
 
-        const rawText =
-            data.candidates[0]
-            .content.parts[0].text;
+                const rawText =
+                    data.candidates[0]
+                    .content.parts[0].text;
 
-        // Remove markdown formatting
-        const cleanedText =
-            rawText
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
-            .trim();
+                const cleanedText =
+                    rawText
+                    .replace(/```json/g, "")
+                    .replace(/```/g, "")
+                    .trim();
 
-        const aiQuestions =
-            JSON.parse(cleanedText);
+                const aiQuestions =
+                    JSON.parse(cleanedText);
 
-        renderAIQuestions(aiQuestions);
+                renderAIQuestions(aiQuestions);
 
-    }
-
-    catch(error) {
-
-        console.error(error);
-
-        alert(
-            "AI generation failed."
-        );
-    }
-}
-
-/* ==========================================
-   RENDER AI QUESTIONS
-   ========================================== */
-
-function renderAIQuestions(questionList) {
-
-    const qViewport =
-        document.getElementById(
-            "questions-viewport"
-        );
-
-    qViewport.innerHTML = "";
-
-    questionList.forEach((q, index) => {
-
-        qViewport.innerHTML += `
-
-            <div class="q-card">
-
-                <div class="q-meta">
-
-                    AI Generated Question
-                    ${index + 1}
-
-                </div>
-
-                <div class="q-text">
-
-                    ${q.question}
-
-                </div>
-
-                <div class="options-grid">
-
-                    ${q.options.map(option => `
-
-                        <div
-                            class="option-item"
-
-                            onclick="
-                                checkAnswer(
-                                    this,
-                                    '${option}',
-                                    '${q.answer}'
-                                )
-                            "
-                        >
-
-                            ${option}
-
-                        </div>
-
-                    `).join("")}
-
-                </div>
-
-            </div>
-        `;
-    });
-}
-
-</script>
-    <script src="data.js"></script>
-</head>
-
-<body>
-
-    <div class="container">
-
-        <!-- Header -->
-        <header>
-            <h1>NEET Biology 10,000 PYQs Quest</h1>
-            <p>Adaptive Online Self-Assessment System</p>
-        </header>
-
-        <!-- Controls -->
-        <div class="controls">
-
-            <span>Select Practice Set:</span>
-
-            <select id="setSelector" onchange="loadSet()">
-
-                <option value="0">
-                    Questions 1 - 100
-                </option>
-
-                <option value="100">
-                    Questions 101 - 200
-                </option>
-
-                <option value="200">
-                    Questions 201 - 300
-                </option>
-
-                <option value="300">
-                    Questions 301 - 400
-                </option>
-
-                <option value="400">
-                    Questions 401 - 500
-                </option>
-
-                <option value="500">
-                    Questions 501 - 600
-                </option>
-
-                <option value="900">
-                    Questions 901 - 1000
-                </option>
-
-                <option value="9900">
-                    Questions 9901 - 10000
-                </option>
-
-            </select>
-
-        </div>
-
-        <!-- Questions -->
-        <div id="questions-viewport">
-
-            Loading Questions...
-
-        </div>
-
-        <!-- Actions -->
-        <div class="action-zone">
-
-            <button
-                class="reveal-btn"
-                onclick="toggleAnswers()"
-            >
-                View Answer Sheet
-            </button>
-
-            <!-- Answer Sheet -->
-            <div
-                class="answer-sheet"
-                id="answerSheetBox"
-            >
-
-                <h2>
-                    Official Verification Sheet
-                </h2>
-
-                <p>
-                    Cross-check your answers below
-                </p>
-
-                <div
-                    class="ans-grid"
-                    id="answers-viewport"
-                >
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- JavaScript -->
-    <script>
-
-        // Load Questions From data.js
-        let allQuestions = window.allQuestionsData || [];
-
-        // Load Selected Set
-        function loadSet() {
-
-            const startIdx = parseInt(
-                document.getElementById("setSelector").value
-            );
-
-            const endIdx = startIdx + 100;
-
-            const currentSubset =
-                allQuestions.slice(startIdx, endIdx);
-
-            const qViewport =
-                document.getElementById("questions-viewport");
-
-            const aViewport =
-                document.getElementById("answers-viewport");
-
-            // Clear Previous Content
-            qViewport.innerHTML = "";
-            aViewport.innerHTML = "";
-
-            // Hide Answer Sheet
-            document.getElementById(
-                "answerSheetBox"
-            ).style.display = "none";
-
-            // If no data
-            if (currentSubset.length === 0) {
-
-                qViewport.innerHTML = `
-                    <p style="color:red;">
-                        No Questions Found!
-                    </p>
-                `;
-
-                return;
             }
 
-            // Render Questions
-            currentSubset.forEach((q) => {
+            catch(error) {
+
+                console.error(error);
+
+                alert(
+                    "AI generation failed"
+                );
+            }
+        }
+
+        /* ===============================
+           RENDER AI QUESTIONS
+        =============================== */
+
+        function renderAIQuestions(questionList) {
+
+            const qViewport =
+                document.getElementById(
+                    "questions-viewport"
+                );
+
+            const aViewport =
+                document.getElementById(
+                    "answers-viewport"
+                );
+
+            qViewport.innerHTML = "";
+
+            aViewport.innerHTML = "";
+
+            questionList.forEach((q, index) => {
 
                 qViewport.innerHTML += `
 
                     <div class="q-card">
 
                         <div class="q-meta">
-                            Q. ${q.id} • ${q.chapter}
+
+                            AI Question
+                            ${index + 1}
+
                         </div>
 
                         <div class="q-text">
+
                             ${q.question}
+
                         </div>
 
                         <div class="options-grid">
 
-                            <div class="option-item">
-                                <strong>A.</strong>
-                                ${q.options[0]}
-                            </div>
+                            ${q.options.map(option => `
 
-                            <div class="option-item">
-                                <strong>B.</strong>
-                                ${q.options[1]}
-                            </div>
+                                <div
+                                    class="option-item"
 
-                            <div class="option-item">
-                                <strong>C.</strong>
-                                ${q.options[2]}
-                            </div>
+                                    onclick="
+                                        checkAnswer(
+                                            this,
+                                            '${option}',
+                                            '${q.answer}'
+                                        )
+                                    "
+                                >
 
-                            <div class="option-item">
-                                <strong>D.</strong>
-                                ${q.options[3]}
-                            </div>
+                                    ${option}
+
+                                </div>
+
+                            `).join("")}
 
                         </div>
 
                     </div>
                 `;
 
-                // Answer Sheet
                 aViewport.innerHTML += `
 
                     <div class="ans-pill">
 
-                        Q${q.id}: ${q.answer}
+                        Q${index + 1}:
+                        ${q.answer}
 
                     </div>
                 `;
             });
         }
 
-        // Toggle Answer Sheet
+        /* ===============================
+           CHECK ANSWER
+        =============================== */
+
+        function checkAnswer(
+            element,
+            selected,
+            correct
+        ) {
+
+            const parent =
+                element.parentElement;
+
+            const allOptions =
+                parent.querySelectorAll(
+                    ".option-item"
+                );
+
+            allOptions.forEach(opt => {
+
+                opt.style.pointerEvents =
+                    "none";
+
+                if (
+                    opt.innerText.includes(
+                        correct
+                    )
+                ) {
+
+                    opt.style.background =
+                        "#c8e6c9";
+
+                    opt.style.border =
+                        "2px solid green";
+                }
+            });
+
+            if (
+                selected === correct
+            ) {
+
+                element.style.background =
+                    "#a5d6a7";
+
+                element.innerHTML +=
+                    " ✅ Correct";
+
+            }
+
+            else {
+
+                element.style.background =
+                    "#ffcdd2";
+
+                element.innerHTML +=
+                    " ❌ Wrong";
+            }
+        }
+
+        /* ===============================
+           TOGGLE ANSWERS
+        =============================== */
+
         function toggleAnswers() {
 
             const box =
-                document.getElementById("answerSheetBox");
+                document.getElementById(
+                    "answerSheetBox"
+                );
 
-            if (box.style.display === "block") {
+            if (
+                box.style.display ===
+                "block"
+            ) {
 
-                box.style.display = "none";
+                box.style.display =
+                    "none";
+            }
 
-            } else {
+            else {
 
-                box.style.display = "block";
+                box.style.display =
+                    "block";
 
                 box.scrollIntoView({
                     behavior: "smooth"
@@ -396,10 +433,8 @@ function renderAIQuestions(questionList) {
             }
         }
 
-        // Initial Load
-        loadSet();
-
     </script>
 
 </body>
+
 </html>
