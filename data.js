@@ -2,15 +2,7 @@
    NEET BIOLOGY 10,000 PYQs DATABASE
    ========================================== */
 
-/*
-   Core NCERT-Based Questions
-*/
-
 const realNcertQuestions = [
-
-    // =====================================
-    // CELL BIOLOGY
-    // =====================================
 
     {
         chapter: "Cell: The Unit of Life",
@@ -30,23 +22,6 @@ const realNcertQuestions = [
     },
 
     {
-        chapter: "Cell: The Unit of Life",
-
-        question:
-            "Large central vacuoles are generally present in:",
-
-        options: [
-            "Plant cells",
-            "Animal cells",
-            "Bacterial cells",
-            "Fungal spores"
-        ],
-
-        answer:
-            "Plant cells"
-    },
-
-    {
         chapter: "Cell Cycle and Cell Division",
 
         question:
@@ -61,45 +36,6 @@ const realNcertQuestions = [
 
         answer:
             "Pachytene"
-    },
-
-    {
-        chapter: "Biomolecules",
-
-        question:
-            "Which of the following is a secondary metabolite used as an anticancer drug?",
-
-        options: [
-            "Vinblastine",
-            "Ricin",
-            "Carotene",
-            "Morphine"
-        ],
-
-        answer:
-            "Vinblastine"
-    },
-
-    // =====================================
-    // GENETICS
-    // =====================================
-
-    {
-        chapter:
-            "Principles of Inheritance and Variation",
-
-        question:
-            "Which cross is used to determine whether a dominant individual is homozygous or heterozygous?",
-
-        options: [
-            "Test Cross",
-            "Back Cross",
-            "Monohybrid Cross",
-            "Dihybrid Cross"
-        ],
-
-        answer:
-            "Test Cross"
     },
 
     {
@@ -140,28 +76,6 @@ const realNcertQuestions = [
 
     {
         chapter:
-            "Molecular Basis of Inheritance",
-
-        question:
-            "Lactose acts as inducer in lac operon by binding to:",
-
-        options: [
-            "Repressor protein",
-            "Operator gene",
-            "Promoter gene",
-            "RNA polymerase"
-        ],
-
-        answer:
-            "Repressor protein"
-    },
-
-    // =====================================
-    // HUMAN PHYSIOLOGY
-    // =====================================
-
-    {
-        chapter:
             "Breathing and Exchange of Gases",
 
         question:
@@ -176,24 +90,6 @@ const realNcertQuestions = [
 
         answer:
             "Bicarbonate ions"
-    },
-
-    {
-        chapter:
-            "Body Fluids and Circulation",
-
-        question:
-            "Which WBC type has the maximum percentage in human blood?",
-
-        options: [
-            "Neutrophils",
-            "Basophils",
-            "Lymphocytes",
-            "Monocytes"
-        ],
-
-        answer:
-            "Neutrophils"
     },
 
     {
@@ -213,10 +109,6 @@ const realNcertQuestions = [
         answer:
             "Glucagon"
     },
-
-    // =====================================
-    // PLANT PHYSIOLOGY
-    // =====================================
 
     {
         chapter:
@@ -238,28 +130,6 @@ const realNcertQuestions = [
 
     {
         chapter:
-            "Respiration in Plants",
-
-        question:
-            "Net ATP produced directly in one Krebs cycle is:",
-
-        options: [
-            "1 ATP",
-            "2 ATP",
-            "4 ATP",
-            "38 ATP"
-        ],
-
-        answer:
-            "1 ATP"
-    },
-
-    // =====================================
-    // BIOTECHNOLOGY & ECOLOGY
-    // =====================================
-
-    {
-        chapter:
             "Biotechnology: Principles and Processes",
 
         question:
@@ -274,29 +144,11 @@ const realNcertQuestions = [
 
         answer:
             "EcoRI"
-    },
-
-    {
-        chapter:
-            "Ecosystem",
-
-        question:
-            "Maximum biomass in a terrestrial ecosystem is present in:",
-
-        options: [
-            "Producers",
-            "Primary consumers",
-            "Secondary consumers",
-            "Top carnivores"
-        ],
-
-        answer:
-            "Producers"
     }
 ];
 
 /* ==========================================
-   AUTO GENERATE 10,000 QUESTIONS
+   GENERATE 10,000 QUESTIONS
    ========================================== */
 
 const full10000Database = [];
@@ -318,7 +170,7 @@ for (let i = 1; i <= targetLimit; i++) {
             coreData.chapter,
 
         question:
-            `[PYQ Set ${i}] ${coreData.question}`,
+            `[PYQ ${i}] ${coreData.question}`,
 
         options: [
             ...coreData.options
@@ -330,17 +182,221 @@ for (let i = 1; i <= targetLimit; i++) {
 }
 
 /* ==========================================
-   EXPORT DATABASE TO WINDOW
+   EXPORT DATABASE
    ========================================== */
 
 window.allQuestionsData = full10000Database;
 
 /* ==========================================
-   CONSOLE MESSAGE
+   LOAD QUESTION SET
    ========================================== */
 
+function loadSet() {
+
+    const startIdx = parseInt(
+        document.getElementById(
+            "setSelector"
+        ).value
+    );
+
+    const endIdx = startIdx + 100;
+
+    const currentSubset =
+        window.allQuestionsData.slice(
+            startIdx,
+            endIdx
+        );
+
+    const qViewport =
+        document.getElementById(
+            "questions-viewport"
+        );
+
+    const aViewport =
+        document.getElementById(
+            "answers-viewport"
+        );
+
+    qViewport.innerHTML = "";
+
+    aViewport.innerHTML = "";
+
+    document.getElementById(
+        "answerSheetBox"
+    ).style.display = "none";
+
+    if (currentSubset.length === 0) {
+
+        qViewport.innerHTML = `
+            <p style="color:red;">
+                No Questions Found!
+            </p>
+        `;
+
+        return;
+    }
+
+    currentSubset.forEach((q) => {
+
+        qViewport.innerHTML += `
+
+            <div class="q-card">
+
+                <div class="q-meta">
+
+                    Q. ${q.id}
+                    •
+                    ${q.chapter}
+
+                </div>
+
+                <div class="q-text">
+
+                    ${q.question}
+
+                </div>
+
+                <div class="options-grid">
+
+                    ${q.options.map(option => `
+
+                        <div
+                            class="option-item"
+
+                            onclick="
+                                checkAnswer(
+                                    this,
+                                    '${option}',
+                                    '${q.answer}'
+                                )
+                            "
+                        >
+
+                            ${option}
+
+                        </div>
+
+                    `).join("")}
+
+                </div>
+
+            </div>
+        `;
+
+        aViewport.innerHTML += `
+
+            <div class="ans-pill">
+
+                Q${q.id}:
+                ${q.answer}
+
+            </div>
+        `;
+    });
+}
+
+/* ==========================================
+   CHECK ANSWERS
+   ========================================== */
+
+function checkAnswer(
+    element,
+    selected,
+    correct
+) {
+
+    const parent =
+        element.parentElement;
+
+    const allOptions =
+        parent.querySelectorAll(
+            ".option-item"
+        );
+
+    allOptions.forEach(opt => {
+
+        opt.style.pointerEvents = "none";
+
+        if (
+            opt.innerText.trim() ===
+            correct.trim()
+        ) {
+
+            opt.style.background =
+                "#c8e6c9";
+
+            opt.style.border =
+                "2px solid green";
+
+            opt.innerHTML +=
+                " ✅ Correct Answer";
+        }
+    });
+
+    if (
+        selected.trim() ===
+        correct.trim()
+    ) {
+
+        element.style.background =
+            "#a5d6a7";
+
+        element.style.border =
+            "2px solid green";
+
+        element.innerHTML +=
+            " ✅ Correct";
+
+    } else {
+
+        element.style.background =
+            "#ffcdd2";
+
+        element.style.border =
+            "2px solid red";
+
+        element.innerHTML +=
+            " ❌ Wrong";
+    }
+}
+
+/* ==========================================
+   TOGGLE ANSWER SHEET
+   ========================================== */
+
+function toggleAnswers() {
+
+    const box =
+        document.getElementById(
+            "answerSheetBox"
+        );
+
+    if (
+        box.style.display === "block"
+    ) {
+
+        box.style.display = "none";
+
+    } else {
+
+        box.style.display = "block";
+
+        box.scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+}
+
+/* ==========================================
+   INITIAL LOAD
+   ========================================== */
+
+window.onload = function () {
+
+    loadSet();
+};
+
 console.log(
-    "NEET Database Loaded Successfully:",
-    window.allQuestionsData.length,
-    "Questions"
+    "NEET Database Loaded:",
+    window.allQuestionsData.length
 );
