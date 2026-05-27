@@ -22,7 +22,7 @@ async function generateAIQuestions() {
 
     const apiKey =
     prompt(
-        "AIzaSyCNNgqG2bg7BjLLP_IjaU27lTyt6BcnUgI"
+        "Enter Gemini API Key"
     );
 
     /* =============================== */
