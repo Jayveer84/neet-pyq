@@ -49,34 +49,36 @@ Format:
 
     try {
 
-        const response =
-            await fetch(
+        ntents: [
 
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey,
+         const response =
+    await fetch(
 
-                {
-                    method: "POST",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey,
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+        {
+            method: "POST",
 
-                    body: JSON.stringify({
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
 
-                        contents: [
+            body: JSON.stringify({
 
+                contents: [
+
+                    {
+                        parts: [
                             {
-                                parts: [
-                                    {
-                                        text: prompt
-                                    }
-                                ]
+                                text: prompt
                             }
                         ]
-                    })
-                }
-            );
+                    }
+                ]
+            })
+        }
+    );
 
         const data =
             await response.json();
